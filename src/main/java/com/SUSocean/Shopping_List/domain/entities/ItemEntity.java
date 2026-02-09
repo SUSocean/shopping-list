@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -15,21 +13,17 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "lists")
-public class ListEntity {
+@Table(name = "items")
+public class ItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID, generator = "lists_id_uuid")
     private UUID id;
 
     private String name;
 
-    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ItemEntity> items = new HashSet<>();
-
-    @ManyToMany(mappedBy = "lists")
-    private Set<UserEntity> users;
+    private boolean isActive;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id", nullable = false)
-    private UserEntity creator;
+    @JoinColumn(name = "list_id", nullable = false)
+    private ListEntity list;
 }
