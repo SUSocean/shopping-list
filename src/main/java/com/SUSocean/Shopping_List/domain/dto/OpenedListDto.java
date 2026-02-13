@@ -2,14 +2,16 @@ package com.SUSocean.Shopping_List.domain.dto;
 
 import com.SUSocean.Shopping_List.domain.entities.ItemEntity;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
-import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,15 +19,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ListDto {
+public class OpenedListDto {
     private UUID id;
 
     private String name;
 
-    private Set<ItemEntity> items;
+    private Set<ItemDto> items = new HashSet<>();
 
-    private Set<UserEntity> users;
+    private Set<SimpleUserDto> users = new HashSet<>();
 
-    private UserEntity creator;
+    private SimpleUserDto creator;
 }
-

@@ -7,15 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDto {
-    private Long id;
-
+public class RequestUserDto {
     private String username;
 
-    private Set<SimpleListDto> lists;
+    private String password;
 }
