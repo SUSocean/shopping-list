@@ -10,10 +10,7 @@ import com.SUSocean.Shopping_List.services.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -95,6 +92,33 @@ public class UserServiceImpl implements UserService {
         });
 
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public ListEntity removeList(Long userId, UUID listId) {
+
+        UserEntity userEntity =  userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("No user found"));
+        ListEntity listEntity = listRepository.findById(listId)
+                .orElseThrow(() -> new RuntimeException("List not found"));
+
+        userEntity.getLists().remove(listEntity);
+        listEntity.getUsers().remove(userEntity);
+
+        if (Objects.equals(listEntity.getCreator(), userEntity)){
+            if (listEntity.getUsers().isEmpty()){
+                listRepository.delete(listEntity);
+            }else{
+                listEntity.setCreator(
+                        listEntity.getUsers().stream().findFirst()
+                        .orElseThrow(() -> new RuntimeException("No users"))
+                );
+            }
+        }
+
+        userRepository.save(userEntity);
+
+        return listEntity;
     }
 
 }

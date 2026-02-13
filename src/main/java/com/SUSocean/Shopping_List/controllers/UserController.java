@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -99,5 +100,21 @@ public class UserController {
 
         ListEntity savedListEntity = listService.createList(list, userId);
         return new ResponseEntity<>(simpleListMapper.mapToSimpleListDto(savedListEntity), HttpStatus.CREATED);
+    }
+
+    @PatchMapping(path = "/users/lists/remove/{list_id}")
+    public ResponseEntity<SimpleListDto> removeList(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id
+    ){
+        Long userId = (Long) httpSession.getAttribute("userId");
+
+        if(userId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ListEntity removedListEntity = userService.removeList(userId, list_id);
+
+        return new ResponseEntity<>(simpleListMapper.mapToSimpleListDto(removedListEntity), HttpStatus.OK);
     }
 }

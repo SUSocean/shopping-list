@@ -17,7 +17,6 @@ public class ItemMapper {
                 .id(itemEntity.getId())
                 .name(itemEntity.getName())
                 .isActive(itemEntity.isActive())
-                .list(simpleListMapper.mapToSimpleListDto(itemEntity.getList()))
                 .build();
     }
 }

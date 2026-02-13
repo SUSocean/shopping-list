@@ -1,8 +1,12 @@
 package com.SUSocean.Shopping_List.controllers;
 
+import com.SUSocean.Shopping_List.domain.dto.ItemDto;
 import com.SUSocean.Shopping_List.domain.dto.OpenedListDto;
+import com.SUSocean.Shopping_List.domain.dto.RequestItemDto;
+import com.SUSocean.Shopping_List.domain.dto.SimpleUserDto;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 import com.SUSocean.Shopping_List.mappers.impl.OpenedListMapper;
+import com.SUSocean.Shopping_List.services.ItemService;
 import com.SUSocean.Shopping_List.services.ListService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
@@ -15,14 +19,16 @@ import java.util.UUID;
 public class ListController {
 
     private ListService listService;
-
+    private ItemService itemService;
     private OpenedListMapper openedListMapper;
 
     public ListController(
             ListService listService,
+            ItemService itemService,
             OpenedListMapper openedListMapper
     ) {
         this.listService = listService;
+        this.itemService = itemService;
         this.openedListMapper = openedListMapper;
     }
 
@@ -38,6 +44,91 @@ public class ListController {
         }
 
         ListEntity listEntity = listService.findById(list_id, userId);
+
+        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/lists/{list_id}/users/add")
+    public ResponseEntity<OpenedListDto> addUser(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id,
+            @RequestBody SimpleUserDto user
+    ){
+        Long creatorId = (Long) httpSession.getAttribute("userId");
+
+        if(creatorId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ListEntity listEntity = listService.addUser(list_id, creatorId, user);
+
+        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/lists/{list_id}/users/remove")
+    public ResponseEntity<OpenedListDto> removeUser(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id,
+            @RequestBody SimpleUserDto user
+    ){
+        Long creatorId = (Long) httpSession.getAttribute("userId");
+
+        if(creatorId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ListEntity listEntity = listService.removeUser(list_id, creatorId, user);
+
+        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/lists/{list_id}/item/add")
+    public ResponseEntity<OpenedListDto> createItem(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id,
+            @RequestBody RequestItemDto requestItemDto
+    ){
+        Long userId = (Long) httpSession.getAttribute("userId");
+
+        if(userId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ListEntity listEntity = itemService.createItem(userId, list_id, requestItemDto);
+
+        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/lists/{list_id}/item/{item_id}/remove")
+    public ResponseEntity<OpenedListDto> removeItem(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id,
+            @PathVariable("item_id") UUID item_id
+    ){
+        Long userId = (Long) httpSession.getAttribute("userId");
+
+        if(userId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ListEntity listEntity = itemService.removeItem(userId, list_id, item_id);
+
+        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/lists/{list_id}/item/{item_id}/toggle")
+    public ResponseEntity<OpenedListDto> toggleItem(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id,
+            @PathVariable("item_id") UUID item_id
+    ){
+        Long userId = (Long) httpSession.getAttribute("userId");
+
+        if(userId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        ListEntity listEntity = itemService.toggleItem(userId, list_id, item_id);
 
         return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
     }
