@@ -77,7 +77,7 @@ public class AuthControllerIntegrationTest {
         RequestUserDto testRequestUserDtoB = TestDataUtil.createRequestUserDtoB();
         userService.saveUser(testRequestUserDtoA);
         String testRequestUserDtoBJson = objectMapper.writeValueAsString(testRequestUserDtoB);
-
+        
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -20,6 +20,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -110,44 +113,49 @@ public class UserControllerIntegrationTest {
         ).andExpect(MockMvcResultMatchers.jsonPath("$.lists").isEmpty()
         );
     }
-//
-//    @Test
-//    public void testThatCreateListReturnsHttpStatus201Created() throws Exception {
-//        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
-//        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
-//
-//        String username = objectMapper.writeValueAsString(testRequestUserDto.getUsername());
-//        String password = objectMapper.writeValueAsString(testRequestUserDto.getPassword());
-//        userService.verifyUser(username, password);
-//
-//        SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
-//        String simpleListDtoJson = objectMapper.writeValueAsString(simpleListDto);
-//
-//        mockMvc.perform(
-//                MockMvcRequestBuilders.post("/users/lists")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(simpleListDtoJson)
-//        ).andExpect(
-//                MockMvcResultMatchers.status().isCreated()
-//        );
-//    }
-//
-//    @Test
-//    public void testThatCreateListReturnsSimpleListDtoWhenListCreated() throws Exception{
-//        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
-//        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
-//
-//        SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
-//        String simpleListDtoJson = objectMapper.writeValueAsString(simpleListDto);
-//        mockMvc.perform(
-//                MockMvcRequestBuilders.post("/users/" + savedUserEntity.getId() + "/lists")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(simpleListDtoJson)
-//        ).andExpect(
-//                MockMvcResultMatchers.jsonPath("$.id").exists()
-//
-//        ).andExpect(
-//                MockMvcResultMatchers.jsonPath("$.name").value(simpleListDto.getName())
-//        );
-//    }
+
+    @Test
+    public void testThatCreateListReturnsHttpStatus201Created() throws Exception {
+        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
+        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
+
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", savedUserEntity.getId());
+
+        SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
+        String simpleListDtoJson = objectMapper.writeValueAsString(simpleListDto);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/users/lists")
+                        .sessionAttrs(sessionAttrs)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(simpleListDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.status().isCreated()
+        );
+    }
+
+    @Test
+    public void testThatCreateListReturnsSimpleListDtoWhenListCreated() throws Exception{
+        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
+        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
+
+        SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
+        String simpleListDtoJson = objectMapper.writeValueAsString(simpleListDto);
+
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", savedUserEntity.getId());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/users/lists")
+                        .sessionAttrs(sessionAttrs)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(simpleListDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.id").exists()
+
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.name").value(simpleListDto.getName())
+        );
+    }
 }
