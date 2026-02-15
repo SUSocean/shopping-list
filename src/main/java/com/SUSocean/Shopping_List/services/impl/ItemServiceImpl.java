@@ -44,19 +44,16 @@ public class ItemServiceImpl implements ItemService {
             throw new RuntimeException("Not a list member");
         }
 
-        int nextPosition = itemRepository.findMaxPositionByListId(listId).orElse(-1) + 1;
-
         ItemEntity itemEntity = ItemEntity.builder()
                 .name(requestItemDto.getName())
                 .isActive(true)
                 .list(listEntity)
-                .position(nextPosition)
+                .position(listEntity.getItems().size())
                 .build();
 
         listEntity.getItems().add(itemEntity);
 
-        itemRepository.flush();
-        return itemEntity;
+        return itemRepository.save(itemEntity);
     }
 
     @Override

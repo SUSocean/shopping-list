@@ -17,6 +17,7 @@ public class ItemMapper {
                 .id(itemEntity.getId())
                 .name(itemEntity.getName())
                 .active(itemEntity.isActive())
+                .position(itemEntity.getPosition())
                 .build();
     }
 }

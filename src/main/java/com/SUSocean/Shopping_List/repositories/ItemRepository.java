@@ -9,7 +9,5 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ItemRepository extends CrudRepository<ItemEntity, UUID>, JpaRepository<ItemEntity, UUID> {
-    @Query("SELECT MAX(i.position) FROM ItemEntity i WHERE i.list.id = :listId")
-    Optional<Integer> findMaxPositionByListId(@Param("listId") UUID listId);
+public interface ItemRepository extends CrudRepository<ItemEntity, UUID>{
 }
