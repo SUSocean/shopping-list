@@ -12,9 +12,7 @@ import com.SUSocean.Shopping_List.services.ItemService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -35,7 +33,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ListEntity createItem(Long userId, UUID listId, RequestItemDto requestItemDto) {
+    public ItemEntity createItem(Long userId, UUID listId, RequestItemDto requestItemDto) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -45,21 +43,25 @@ public class ItemServiceImpl implements ItemService {
         if (!listEntity.getUsers().contains(user)){
             throw new RuntimeException("Not a list member");
         }
+
+        int nextPosition = itemRepository.findMaxPositionByListId(listId).orElse(-1) + 1;
 
         ItemEntity itemEntity = ItemEntity.builder()
                 .name(requestItemDto.getName())
                 .isActive(true)
                 .list(listEntity)
+                .position(nextPosition)
                 .build();
 
         listEntity.getItems().add(itemEntity);
 
-        return listEntity;
+        itemRepository.flush();
+        return itemEntity;
     }
 
     @Override
     @Transactional
-    public ListEntity removeItem(Long userId, UUID listId, UUID itemId) {
+    public ItemEntity removeItem(Long userId, UUID listId, UUID itemId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -77,15 +79,23 @@ public class ItemServiceImpl implements ItemService {
         if (!itemEntity.getList().getId().equals(listId)) {
             throw new RuntimeException("Item does not belong to this list");
         }
+
+        int remmovedPosition = itemEntity.getPosition();
 
         listEntity.getItems().remove(itemEntity);
 
-        return listEntity;
+        for(ItemEntity item : listEntity.getItems()){
+            if(item.getPosition() > remmovedPosition){
+                item.setPosition(item.getPosition() - 1);
+            }
+        }
+
+        return itemEntity;
     }
 
     @Override
     @Transactional
-    public ListEntity toggleItem(Long userId, UUID listId, UUID itemId) {
+    public ItemEntity editItem(Long userId, UUID listId, UUID item_id, ItemDto item) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -96,7 +106,7 @@ public class ItemServiceImpl implements ItemService {
             throw new RuntimeException("Not a list member");
         }
 
-        ItemEntity itemEntity = itemRepository.findById(itemId)
+        ItemEntity itemEntity = itemRepository.findById(item_id)
                 .orElseThrow(() -> new RuntimeException("No item found"));
 
 
@@ -104,8 +114,9 @@ public class ItemServiceImpl implements ItemService {
             throw new RuntimeException("Item does not belong to this list");
         }
 
-        itemEntity.setActive(!itemEntity.isActive());
+        itemEntity.setActive(item.isActive());
+        itemEntity.setName(item.getName());
 
-        return listEntity;
+        return itemEntity;
     }
 }

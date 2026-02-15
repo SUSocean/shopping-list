@@ -16,7 +16,7 @@ public class ItemMapper {
         return ItemDto.builder()
                 .id(itemEntity.getId())
                 .name(itemEntity.getName())
-                .isActive(itemEntity.isActive())
+                .active(itemEntity.isActive())
                 .build();
     }
 }

@@ -1,10 +1,9 @@
 package com.SUSocean.Shopping_List.controllers;
 
-import com.SUSocean.Shopping_List.domain.dto.ItemDto;
-import com.SUSocean.Shopping_List.domain.dto.OpenedListDto;
-import com.SUSocean.Shopping_List.domain.dto.RequestItemDto;
-import com.SUSocean.Shopping_List.domain.dto.SimpleUserDto;
+import com.SUSocean.Shopping_List.domain.dto.*;
+import com.SUSocean.Shopping_List.domain.entities.ItemEntity;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
+import com.SUSocean.Shopping_List.mappers.impl.ItemMapper;
 import com.SUSocean.Shopping_List.mappers.impl.OpenedListMapper;
 import com.SUSocean.Shopping_List.services.ItemService;
 import com.SUSocean.Shopping_List.services.ListService;
@@ -13,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,15 +21,18 @@ public class ListController {
     private ListService listService;
     private ItemService itemService;
     private OpenedListMapper openedListMapper;
+    private ItemMapper itemMapper;
 
     public ListController(
             ListService listService,
             ItemService itemService,
-            OpenedListMapper openedListMapper
+            OpenedListMapper openedListMapper,
+            ItemMapper itemMapper
     ) {
         this.listService = listService;
         this.itemService = itemService;
         this.openedListMapper = openedListMapper;
+        this.itemMapper = itemMapper;
     }
 
     @GetMapping(path = "/lists/{list_id}")
@@ -83,7 +86,7 @@ public class ListController {
     }
 
     @PostMapping(path = "/lists/{list_id}/item/add")
-    public ResponseEntity<OpenedListDto> createItem(
+    public ResponseEntity<ItemDto> createItem(
             HttpSession httpSession,
             @PathVariable("list_id") UUID list_id,
             @RequestBody RequestItemDto requestItemDto
@@ -94,13 +97,13 @@ public class ListController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ListEntity listEntity = itemService.createItem(userId, list_id, requestItemDto);
+        ItemEntity itemEntity = itemService.createItem(userId, list_id, requestItemDto);
 
-        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+        return new ResponseEntity<>(itemMapper.mapToItemDto(itemEntity), HttpStatus.OK);
     }
 
     @PatchMapping(path = "/lists/{list_id}/item/{item_id}/remove")
-    public ResponseEntity<OpenedListDto> removeItem(
+    public ResponseEntity<ItemDto> removeItem(
             HttpSession httpSession,
             @PathVariable("list_id") UUID list_id,
             @PathVariable("item_id") UUID item_id
@@ -111,16 +114,17 @@ public class ListController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ListEntity listEntity = itemService.removeItem(userId, list_id, item_id);
+        ItemEntity itemEntity = itemService.removeItem(userId, list_id, item_id);
 
-        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+        return new ResponseEntity<>(itemMapper.mapToItemDto(itemEntity), HttpStatus.OK);
     }
 
-    @PatchMapping(path = "/lists/{list_id}/item/{item_id}/toggle")
-    public ResponseEntity<OpenedListDto> toggleItem(
+    @PatchMapping(path = "/lists/{list_id}/item/{item_id}/edit")
+    public ResponseEntity<ItemDto> editItem(
             HttpSession httpSession,
             @PathVariable("list_id") UUID list_id,
-            @PathVariable("item_id") UUID item_id
+            @PathVariable("item_id") UUID item_id,
+            @RequestBody ItemDto item
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
 
@@ -128,8 +132,25 @@ public class ListController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ListEntity listEntity = itemService.toggleItem(userId, list_id, item_id);
+        ItemEntity itemEntity = itemService.editItem(userId, list_id, item_id, item);
 
-        return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
+        return new ResponseEntity<>(itemMapper.mapToItemDto(itemEntity), HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/lists/{list_id}")
+    public ResponseEntity<List<ItemDto>> editList(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id,
+            @RequestBody RequestListDto list
+    ){
+        Long userId = (Long) httpSession.getAttribute("userId");
+
+        if(userId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<ItemDto> itemList = listService.editList(userId, list_id, list);
+
+        return new ResponseEntity<>(itemList, HttpStatus.OK);
     }
 }

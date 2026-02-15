@@ -23,6 +23,8 @@ public class ItemEntity {
 
     private boolean isActive;
 
+    private int position;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id", nullable = false)
     private ListEntity list;

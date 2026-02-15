@@ -24,7 +24,7 @@ public class OpenedListMapper {
                 .name(listEntity.getName())
                 .items(listEntity.getItems().stream()
                         .map(itemEntity -> itemMapper.mapToItemDto(itemEntity))
-                        .collect(Collectors.toSet())
+                        .collect(Collectors.toList())
                 )
                 .users(listEntity.getUsers().stream()
                         .map(userEntity -> simpleUserMapper.mapToSimpleUserDto(userEntity))

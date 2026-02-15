@@ -5,18 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ItemDto {
-    private UUID id;
-
+public class RequestListDto {
     private String name;
-
-    private int position;
-
-    private boolean active;
+    private List<UUID> itemsOrder = new ArrayList<>();
 }

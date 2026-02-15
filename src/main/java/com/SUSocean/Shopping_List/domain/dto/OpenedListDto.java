@@ -11,9 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -24,7 +22,7 @@ public class OpenedListDto {
 
     private String name;
 
-    private Set<ItemDto> items = new HashSet<>();
+    private List<ItemDto> items = new ArrayList<>();
 
     private Set<SimpleUserDto> users = new HashSet<>();
 

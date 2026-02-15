@@ -3,9 +3,7 @@ package com.SUSocean.Shopping_List.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -22,7 +20,8 @@ public class ListEntity {
     private String name;
 
     @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ItemEntity> items = new HashSet<>();
+    @OrderBy("position ASC")
+    private List<ItemEntity> items = new ArrayList<>();
 
     @ManyToMany(mappedBy = "lists")
     private Set<UserEntity> users = new HashSet<>();

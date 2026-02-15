@@ -1,27 +1,34 @@
 package com.SUSocean.Shopping_List.services.impl;
 
+import com.SUSocean.Shopping_List.domain.dto.ItemDto;
+import com.SUSocean.Shopping_List.domain.dto.RequestListDto;
 import com.SUSocean.Shopping_List.domain.dto.SimpleListDto;
 import com.SUSocean.Shopping_List.domain.dto.SimpleUserDto;
+import com.SUSocean.Shopping_List.domain.entities.ItemEntity;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
+import com.SUSocean.Shopping_List.mappers.impl.ItemMapper;
 import com.SUSocean.Shopping_List.repositories.ListRepository;
 import com.SUSocean.Shopping_List.repositories.UserRepository;
 import com.SUSocean.Shopping_List.services.ListService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ListServiceImpl implements ListService {
 
     private ListRepository listRepository;
     private UserRepository userRepository;
+    private ItemMapper itemMapper;
 
-    public ListServiceImpl(ListRepository listRepository, UserRepository userRepository) {
+    public ListServiceImpl(ListRepository listRepository, UserRepository userRepository, ItemMapper itemMapper) {
         this.listRepository = listRepository;
         this.userRepository = userRepository;
+        this.itemMapper = itemMapper;
     }
 
     @Override
@@ -95,5 +102,45 @@ public class ListServiceImpl implements ListService {
         userEntity.getLists().remove(listEntity);
 
         return listRepository.save(listEntity);
+    }
+
+    @Override
+    @Transactional
+    public List<ItemDto> editList(Long userId, UUID listId, RequestListDto list) {
+        ListEntity listEntity = listRepository.findById(listId).orElseThrow(() -> new RuntimeException("List not found"));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        if(!listEntity.getUsers().contains(userEntity)){
+            throw new RuntimeException("User not found");
+        }
+
+
+        listEntity.setName(list.getName());
+
+        List<ItemEntity> items = listEntity.getItems();
+
+        Map<UUID, ItemEntity> itemMap = items.stream()
+                .collect(Collectors.toMap(ItemEntity::getId, Function.identity()));
+
+        if (list.getItemsOrder().size() != items.size()) {
+            throw new IllegalArgumentException("Mismatch between items and order payload");
+        }
+
+        for (int i = 0; i < items.size(); i++) {
+
+            UUID id = list.getItemsOrder().get(i);
+
+            ItemEntity item = itemMap.get(id);
+
+            if (item == null) {
+                throw new IllegalArgumentException("Item " + id + " does not belong to list");
+            }
+
+            item.setPosition(i);
+        }
+
+        return listEntity.getItems().stream()
+                .sorted((Comparator.comparingInt(ItemEntity::getPosition)))
+                .map(itemMapper::mapToItemDto).toList();
     }
 }

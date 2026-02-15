@@ -4,14 +4,12 @@ import com.SUSocean.Shopping_List.TestDataUtil;
 import com.SUSocean.Shopping_List.domain.dto.RequestUserDto;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
 import com.SUSocean.Shopping_List.services.UserService;
-import org.apache.catalina.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,13 +17,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import tools.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
-public class AuthControllerIntegrationTest {
+public class AuthControllerIntegrationTests {
     private UserService userService;
 
     private MockMvc mockMvc;
@@ -33,7 +32,7 @@ public class AuthControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public AuthControllerIntegrationTest(UserService userService, MockMvc mockMvc, ObjectMapper objectMapper) {
+    public AuthControllerIntegrationTests(UserService userService, MockMvc mockMvc, ObjectMapper objectMapper) {
         this.userService = userService;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
@@ -77,7 +76,8 @@ public class AuthControllerIntegrationTest {
         RequestUserDto testRequestUserDtoB = TestDataUtil.createRequestUserDtoB();
         userService.saveUser(testRequestUserDtoA);
         String testRequestUserDtoBJson = objectMapper.writeValueAsString(testRequestUserDtoB);
-        
+
+
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -86,9 +86,19 @@ public class AuthControllerIntegrationTest {
     }
 
     @Test
-    public void testThatAuthLogoutReturns200Ok() throws Exception {mockMvc.perform(
+    public void testThatAuthLogoutReturns200OkAndInvalidatesHttpSession() throws Exception {
+        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
+        UserEntity savedUser = userService.saveUser(testRequestUserDto);
+
+
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", savedUser.getId());
+
+        mockMvc.perform(
                 MockMvcRequestBuilders.post("/auth/logout")
-        ).andExpect(MockMvcResultMatchers.status().isOk());
+                        .sessionAttrs(sessionAttrs)
+        ).andExpect(MockMvcResultMatchers.status().isOk()
+    ).andExpect(MockMvcResultMatchers.request().sessionAttributeDoesNotExist("userId"));
     }
 
 }
