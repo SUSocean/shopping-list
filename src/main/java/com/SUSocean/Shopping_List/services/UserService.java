@@ -11,13 +11,9 @@ import java.util.UUID;
 public interface UserService {
     UserEntity saveUser(RequestUserDto userEntity);
 
-    List<UserEntity> findAll();
-
-    Optional<UserEntity> findOne(Long id);
-
     UserEntity verifyUser(String username, String password);
 
-    boolean existsByUsename(String username);
+    boolean existsByUsername(String username);
 
     void deleteUser(Long userId);
 

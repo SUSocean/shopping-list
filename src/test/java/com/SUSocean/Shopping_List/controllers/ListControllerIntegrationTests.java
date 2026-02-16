@@ -24,8 +24,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -239,7 +237,7 @@ public class ListControllerIntegrationTests {
     }
 
     @Test
-    public void testThatEditListReturnsEditedList() throws Exception{
+    public void testThatReorderListReturnsEditedList() throws Exception{
         SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
         RequestUserDto requestUserDto = TestDataUtil.createRequestUserDtoA();
 
@@ -256,17 +254,16 @@ public class ListControllerIntegrationTests {
         newOrder.add(savedItemB.getId());
         newOrder.add(savedItemA.getId());
 
-        RequestListDto requestListDto = RequestListDto.builder()
-                .name("new list name")
+        RequestReorderListDto requestReorderListDto = RequestReorderListDto.builder()
                 .itemsOrder(newOrder)
                 .build();
 
-        String requestListDtoJson = objectMapper.writeValueAsString(requestListDto);
+        String requestListDtoJson = objectMapper.writeValueAsString(requestReorderListDto);
 
         Map<String, Object> sessionAttrs = new HashMap<>();
         sessionAttrs.put("userId", savedUserEntity.getId());
         mockMvc.perform(
-                MockMvcRequestBuilders.patch("/lists/" + savedListEntity.getId())
+                MockMvcRequestBuilders.patch("/lists/" + savedListEntity.getId() + "/reorder")
                         .sessionAttrs(sessionAttrs)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestListDtoJson)
@@ -278,6 +275,31 @@ public class ListControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$[1].id").value(savedItemA.getId().toString())
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$[1].position").value(1)
+        );
+    }
+
+    @Test
+    public void testThatRenameListReturnsRenamedList() throws Exception {
+        SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
+        RequestUserDto requestUserDto = TestDataUtil.createRequestUserDtoA();
+
+        UserEntity savedUserEntity = userService.saveUser(requestUserDto);
+        ListEntity savedListEntity =  listService.createList(simpleListDto, savedUserEntity.getId());
+
+        simpleListDto.setName("new name");
+
+        String simpleListDtoJson = objectMapper.writeValueAsString(simpleListDto);
+
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", savedUserEntity.getId());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch("/lists/" + savedListEntity.getId() + "/rename")
+                        .sessionAttrs(sessionAttrs)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(simpleListDtoJson)
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.name").value("new name")
         );
     }
 }

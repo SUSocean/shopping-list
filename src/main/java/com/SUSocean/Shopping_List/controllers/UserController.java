@@ -2,12 +2,10 @@ package com.SUSocean.Shopping_List.controllers;
 
 import com.SUSocean.Shopping_List.domain.dto.RequestUserDto;
 import com.SUSocean.Shopping_List.domain.dto.SimpleListDto;
-import com.SUSocean.Shopping_List.domain.dto.SimpleUserDto;
 import com.SUSocean.Shopping_List.domain.dto.UserDto;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
 import com.SUSocean.Shopping_List.mappers.impl.SimpleListMapper;
-import com.SUSocean.Shopping_List.mappers.impl.SimpleUserMapper;
 import com.SUSocean.Shopping_List.mappers.impl.UserDtoMapper;
 import com.SUSocean.Shopping_List.services.ListService;
 import com.SUSocean.Shopping_List.services.UserService;
@@ -16,10 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -27,7 +23,6 @@ public class UserController {
 
     private UserService userService;
     private ListService listService;
-
     private UserDtoMapper userDtoMapper;
     private SimpleListMapper simpleListMapper;
 
@@ -46,7 +41,7 @@ public class UserController {
             HttpSession httpSession,
             @RequestBody RequestUserDto user
     ){
-        if(userService.existsByUsename(user.getUsername())){
+        if(userService.existsByUsername(user.getUsername())){
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
@@ -68,23 +63,6 @@ public class UserController {
         httpSession.invalidate();
 
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping(path = "/users")
-    public List<UserDto> listUsers(){
-        List<UserEntity> userEntities = userService.findAll();
-        return userEntities.stream()
-                .map(userDtoMapper::mapToUserDto)
-                .collect(Collectors.toList());
-    }
-
-    @GetMapping(path = "/users/{id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable("id") Long id){
-        Optional<UserEntity> foundUser = userService.findOne(id);
-        return foundUser.map(userEntity -> {
-            UserDto userDto = userDtoMapper.mapToUserDto(userEntity);
-            return new ResponseEntity<>(userDto, HttpStatus.OK);
-        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping(path = "/users/lists")

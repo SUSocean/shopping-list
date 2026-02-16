@@ -33,8 +33,7 @@ public class ListEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ListEntity)) return false;
-        ListEntity that = (ListEntity) o;
+        if (!(o instanceof ListEntity that)) return false;
         return id != null && id.equals(that.id);
     }
 

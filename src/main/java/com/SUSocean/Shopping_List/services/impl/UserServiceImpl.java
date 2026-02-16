@@ -4,48 +4,42 @@ import com.SUSocean.Shopping_List.domain.dto.RequestUserDto;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
 import com.SUSocean.Shopping_List.exception.InvalidCredentialsException;
+import com.SUSocean.Shopping_List.exception.NotFoundException;
 import com.SUSocean.Shopping_List.repositories.ListRepository;
 import com.SUSocean.Shopping_List.repositories.UserRepository;
 import com.SUSocean.Shopping_List.services.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
-    private ListRepository listRepository;
-    public UserServiceImpl(UserRepository userRepository, ListRepository listRepository) {
+    private final UserRepository userRepository;
+    private final ListRepository listRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(
+            UserRepository userRepository,
+            ListRepository listRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         this.userRepository = userRepository;
         this.listRepository = listRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public UserEntity saveUser(RequestUserDto user) {
         UserEntity userEntity = UserEntity.builder()
-                .password(user.getPassword())
+                .password(passwordEncoder.encode(user.getPassword()))
                 .username(user.getUsername())
-                .lists(new HashSet<ListEntity>())
+                .lists(new HashSet<>())
                 .build();
 
         return userRepository.save(userEntity);
-    }
-
-    @Override
-    public List<UserEntity> findAll() {
-        return StreamSupport.stream(userRepository.
-                findAll()
-                .spliterator(), false)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<UserEntity> findOne(Long id) {
-        return userRepository.findById(id);
     }
 
     @Override
@@ -53,7 +47,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if(!Objects.equals(user.getPassword(), password)) {
+        if(!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException();
         }
 
@@ -61,19 +55,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean existsByUsename(String username) {
-        if(userRepository.findByUsername(username).isEmpty()){
-            return false;
-        } else{
-            return true;
-        }
+    public boolean existsByUsername(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 
     @Override
     @Transactional
     public void deleteUser(Long userId) {
         UserEntity userEntity =  userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("No user found"));
+                .orElseThrow(() -> new NotFoundException("No user found"));
 
         userEntity.getLists().forEach(listEntity -> {
 
@@ -85,7 +75,7 @@ public class UserServiceImpl implements UserService {
                     listRepository.delete(listEntity);
                 }else{
                     listEntity.setCreator(listEntity.getUsers().stream().findFirst()
-                            .orElseThrow(() -> new RuntimeException("No users")));
+                            .orElseThrow(() -> new NotFoundException("No users")));
                 }
 
             }
@@ -98,9 +88,9 @@ public class UserServiceImpl implements UserService {
     public ListEntity removeList(Long userId, UUID listId) {
 
         UserEntity userEntity =  userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("No user found"));
+                .orElseThrow(() -> new NotFoundException("No user found"));
         ListEntity listEntity = listRepository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("List not found"));
+                .orElseThrow(() -> new NotFoundException("List not found"));
 
         userEntity.getLists().remove(listEntity);
         listEntity.getUsers().remove(userEntity);
@@ -111,7 +101,7 @@ public class UserServiceImpl implements UserService {
             }else{
                 listEntity.setCreator(
                         listEntity.getUsers().stream().findFirst()
-                        .orElseThrow(() -> new RuntimeException("No users"))
+                        .orElseThrow(() -> new NotFoundException("No users"))
                 );
             }
         }
@@ -120,5 +110,4 @@ public class UserServiceImpl implements UserService {
 
         return listEntity;
     }
-
 }

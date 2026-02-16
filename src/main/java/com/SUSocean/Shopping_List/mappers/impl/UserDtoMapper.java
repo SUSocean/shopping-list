@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public class UserDtoMapper {
 
     private SimpleListMapper simpleListMapper;
+
     public UserDtoMapper(ModelMapper modelMapper, SimpleListMapper simpleListMapper) {
         this.simpleListMapper = simpleListMapper;
     }

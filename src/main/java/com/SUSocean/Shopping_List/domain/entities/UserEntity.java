@@ -33,8 +33,7 @@ public class UserEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserEntity)) return false;
-        UserEntity that = (UserEntity) o;
+        if (!(o instanceof UserEntity that)) return false;
         return id != null && id.equals(that.id);
     }
 

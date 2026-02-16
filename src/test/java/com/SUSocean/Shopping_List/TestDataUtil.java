@@ -4,13 +4,6 @@ import com.SUSocean.Shopping_List.domain.dto.*;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
 
 public final class TestDataUtil {
-    public static UserEntity createUserEntityA(){
-        return UserEntity.builder()
-                .username("Shopper A")
-                .password("password A")
-                .lists(null)
-                .build();
-    }
 
     public static RequestUserDto createRequestUserDtoA(){
         return RequestUserDto.builder()
@@ -26,13 +19,6 @@ public final class TestDataUtil {
                 .build();
     }
 
-    public static SimpleUserDto createSimpleUserDtoA(){
-        return SimpleUserDto.builder()
-                .id(1L)
-                .username("Shopper A")
-                .build();
-    }
-
     public static SimpleListDto createSimpleListDtoA(){
         return SimpleListDto.builder()
                 .name("Simple List A")
@@ -44,14 +30,6 @@ public final class TestDataUtil {
                 .name("Simple List B")
                 .build();
     }
-
-    public static OpenedListDto createOpenedListDtoA(){
-        return OpenedListDto.builder()
-                .name("List A")
-                .creator(createSimpleUserDtoA())
-                .build();
-    }
-
 
     public static RequestItemDto createRequestItemDtoA() {
         return RequestItemDto.builder()
@@ -71,6 +49,4 @@ public final class TestDataUtil {
                 .active(false)
                 .build();
     }
-
-
 }

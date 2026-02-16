@@ -3,7 +3,6 @@ package com.SUSocean.Shopping_List.controllers;
 import com.SUSocean.Shopping_List.TestDataUtil;
 import com.SUSocean.Shopping_List.domain.dto.RequestUserDto;
 import com.SUSocean.Shopping_List.domain.dto.SimpleListDto;
-import com.SUSocean.Shopping_List.domain.dto.SimpleUserDto;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
 import com.SUSocean.Shopping_List.services.ListService;
@@ -39,7 +38,12 @@ public class UserControllerIntegrationTests {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public UserControllerIntegrationTests(UserService userService, MockMvc mockMvc, ObjectMapper objectMapper, ListService listService) {
+    public UserControllerIntegrationTests(
+            UserService userService,
+            MockMvc mockMvc,
+            ObjectMapper objectMapper,
+            ListService listService
+    ) {
         this.userService = userService;
         this.listService = listService;
         this.mockMvc = mockMvc;
@@ -75,7 +79,6 @@ public class UserControllerIntegrationTests {
 
     @Test
     public void testThatDeleteUserReturnsNoContentAndDeletesHttpSessionAttribute() throws Exception{
-
         RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
         UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
 
@@ -91,51 +94,6 @@ public class UserControllerIntegrationTests {
                         .content(testRequestUserDtoJson)
         ).andExpect(MockMvcResultMatchers.status().isNoContent()
         ).andExpect(MockMvcResultMatchers.request().sessionAttributeDoesNotExist("userId"));
-    }
-
-    @Test
-    public void testThatListUsersReturnsHttpStatus200() throws Exception {
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-    @Test
-    public void testThatListUsersReturnListOfUsers() throws Exception{
-        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
-        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/users").
-                contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$[0].id").isNumber()
-        ).andExpect(MockMvcResultMatchers.jsonPath("$[0].username").value(savedUserEntity.getUsername())
-        ).andExpect(MockMvcResultMatchers.jsonPath("$[0].lists").isEmpty());
-    }
-
-    @Test
-    public void testThatGetUserSuccessfullyReturns200WhenUserExists() throws Exception {
-        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
-        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/users/" + savedUserEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-    @Test
-    public void testThatGetUserReturnsUserWhenUserExists() throws Exception{
-        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
-        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.get("/users/" + savedUserEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedUserEntity.getId())
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.username").value(savedUserEntity.getUsername())
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.lists").isEmpty()
-        );
     }
 
     @Test
@@ -185,7 +143,6 @@ public class UserControllerIntegrationTests {
 
     @Test
     public void testThatRemoveListReturnsRemovedSimpleList() throws Exception{
-
         RequestUserDto requestUserDtoA = TestDataUtil.createRequestUserDtoA();
 
         UserEntity savedUserEntityA = userService.saveUser(requestUserDtoA);
@@ -195,7 +152,6 @@ public class UserControllerIntegrationTests {
 
         listService.createList(simpleListDtoA, savedUserEntityA.getId());
         ListEntity savedListEntityB =  listService.createList(simpleListDtoB, savedUserEntityA.getId());
-
 
         Map<String, Object> sessionAttrs = new HashMap<>();
         sessionAttrs.put("userId", savedUserEntityA.getId());
@@ -210,6 +166,4 @@ public class UserControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.name").value(savedListEntityB.getName())
         );
     }
-
-
 }

@@ -1,9 +1,6 @@
 package com.SUSocean.Shopping_List.services;
 
-import com.SUSocean.Shopping_List.domain.dto.ItemDto;
-import com.SUSocean.Shopping_List.domain.dto.RequestListDto;
-import com.SUSocean.Shopping_List.domain.dto.SimpleListDto;
-import com.SUSocean.Shopping_List.domain.dto.SimpleUserDto;
+import com.SUSocean.Shopping_List.domain.dto.*;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 
 import java.util.List;
@@ -18,5 +15,7 @@ public interface ListService{
 
     ListEntity removeUser(UUID listId, Long creatorId, SimpleUserDto user);
 
-    List<ItemDto> editList(Long userId, UUID listId, RequestListDto list);
+    List<ItemDto> reorderList(Long userId, UUID listId, RequestReorderListDto list);
+
+    SimpleListDto renameList(Long userId, UUID listId, String name);
 }

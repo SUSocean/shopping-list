@@ -11,7 +11,6 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RequestListDto {
-    private String name;
+public class RequestReorderListDto {
     private List<UUID> itemsOrder = new ArrayList<>();
 }

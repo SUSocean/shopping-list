@@ -77,7 +77,6 @@ public class AuthControllerIntegrationTests {
         userService.saveUser(testRequestUserDtoA);
         String testRequestUserDtoBJson = objectMapper.writeValueAsString(testRequestUserDtoB);
 
-
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +89,6 @@ public class AuthControllerIntegrationTests {
         RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
         UserEntity savedUser = userService.saveUser(testRequestUserDto);
 
-
         Map<String, Object> sessionAttrs = new HashMap<>();
         sessionAttrs.put("userId", savedUser.getId());
 
@@ -100,5 +98,4 @@ public class AuthControllerIntegrationTests {
         ).andExpect(MockMvcResultMatchers.status().isOk()
     ).andExpect(MockMvcResultMatchers.request().sessionAttributeDoesNotExist("userId"));
     }
-
 }

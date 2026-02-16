@@ -5,6 +5,8 @@ import com.SUSocean.Shopping_List.domain.dto.RequestItemDto;
 import com.SUSocean.Shopping_List.domain.entities.ItemEntity;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
+import com.SUSocean.Shopping_List.exception.ForbiddenException;
+import com.SUSocean.Shopping_List.exception.NotFoundException;
 import com.SUSocean.Shopping_List.repositories.ItemRepository;
 import com.SUSocean.Shopping_List.repositories.ListRepository;
 import com.SUSocean.Shopping_List.repositories.UserRepository;
@@ -35,13 +37,13 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemEntity createItem(Long userId, UUID listId, RequestItemDto requestItemDto) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         ListEntity listEntity = listRepository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("List not found"));
+                .orElseThrow(() -> new NotFoundException("List not found"));
 
         if (!listEntity.getUsers().contains(user)){
-            throw new RuntimeException("Not a list member");
+            throw new ForbiddenException("Not a list member");
         }
 
         ItemEntity itemEntity = ItemEntity.builder()
@@ -60,29 +62,29 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemEntity removeItem(Long userId, UUID listId, UUID itemId) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         ListEntity listEntity = listRepository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("List not found"));
+                .orElseThrow(() -> new NotFoundException("List not found"));
 
         if (!listEntity.getUsers().contains(user)){
-            throw new RuntimeException("Not a list member");
+            throw new ForbiddenException("Not a list member");
         }
 
         ItemEntity itemEntity = itemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("No item found"));
+                .orElseThrow(() -> new NotFoundException("No item found"));
 
 
         if (!itemEntity.getList().getId().equals(listId)) {
-            throw new RuntimeException("Item does not belong to this list");
+            throw new ForbiddenException("Item does not belong to this list");
         }
 
-        int remmovedPosition = itemEntity.getPosition();
+        int removedPosition = itemEntity.getPosition();
 
         listEntity.getItems().remove(itemEntity);
 
         for(ItemEntity item : listEntity.getItems()){
-            if(item.getPosition() > remmovedPosition){
+            if(item.getPosition() > removedPosition){
                 item.setPosition(item.getPosition() - 1);
             }
         }
@@ -94,21 +96,21 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemEntity editItem(Long userId, UUID listId, UUID item_id, ItemDto item) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         ListEntity listEntity = listRepository.findById(listId)
-                .orElseThrow(() -> new RuntimeException("List not found"));
+                .orElseThrow(() -> new NotFoundException("List not found"));
 
         if (!listEntity.getUsers().contains(user)){
-            throw new RuntimeException("Not a list member");
+            throw new ForbiddenException("Not a list member");
         }
 
         ItemEntity itemEntity = itemRepository.findById(item_id)
-                .orElseThrow(() -> new RuntimeException("No item found"));
+                .orElseThrow(() -> new NotFoundException("No item found"));
 
 
         if (!itemEntity.getList().getId().equals(listId)) {
-            throw new RuntimeException("Item does not belong to this list");
+            throw new ForbiddenException("Item does not belong to this list");
         }
 
         itemEntity.setActive(item.isActive());

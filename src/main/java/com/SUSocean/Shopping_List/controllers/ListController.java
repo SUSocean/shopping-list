@@ -137,11 +137,11 @@ public class ListController {
         return new ResponseEntity<>(itemMapper.mapToItemDto(itemEntity), HttpStatus.OK);
     }
 
-    @PatchMapping(path = "/lists/{list_id}")
-    public ResponseEntity<List<ItemDto>> editList(
+    @PatchMapping(path = "/lists/{list_id}/reorder")
+    public ResponseEntity<List<ItemDto>> reorderList(
             HttpSession httpSession,
             @PathVariable("list_id") UUID list_id,
-            @RequestBody RequestListDto list
+            @RequestBody RequestReorderListDto list
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
 
@@ -149,8 +149,25 @@ public class ListController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        List<ItemDto> itemList = listService.editList(userId, list_id, list);
+        List<ItemDto> itemList = listService.reorderList(userId, list_id, list);
 
         return new ResponseEntity<>(itemList, HttpStatus.OK);
+    }
+
+    @PatchMapping(path = "/lists/{list_id}/rename")
+    public ResponseEntity<SimpleListDto> renameList(
+            HttpSession httpSession,
+            @PathVariable("list_id") UUID list_id,
+            @RequestBody RequestRenameListDto requestRenameListDto
+    ){
+        Long userId = (Long) httpSession.getAttribute("userId");
+
+        if(userId == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        SimpleListDto list = listService.renameList(userId, list_id, requestRenameListDto.getName());
+
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 }
