@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import tools.jackson.databind.ObjectMapper;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +51,22 @@ public class AuthControllerIntegrationTests {
         ).andExpect(MockMvcResultMatchers.status().isOk());
     }
 
+    @Test
+    public void testThatAuthLoginReturn400BadRequestWhenCredentialAreEmpty() throws Exception{
+
+        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
+        testRequestUserDto.setUsername("");
+        String testRequestUserDtoJson = objectMapper.writeValueAsString(testRequestUserDto);
+
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(testRequestUserDtoJson)
+        ).andExpect(MockMvcResultMatchers.status().isBadRequest()
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                .value("Blank username or password"));
+    }
 
     @Test
     public void testThatAuthLoginReturnsCorrectUserDtoWhenCredentialsAreCorrect() throws Exception {
@@ -81,7 +96,8 @@ public class AuthControllerIntegrationTests {
                 MockMvcRequestBuilders.post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(testRequestUserDtoBJson)
-        ).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        ).andExpect(MockMvcResultMatchers.status().isUnauthorized()
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid credentials"));
     }
 
     @Test

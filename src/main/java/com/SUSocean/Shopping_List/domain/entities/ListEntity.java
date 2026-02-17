@@ -14,7 +14,7 @@ import java.util.*;
 @Table(name = "lists")
 public class ListEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID, generator = "lists_id_uuid")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String name;

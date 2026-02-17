@@ -41,9 +41,6 @@ public class UserController {
             HttpSession httpSession,
             @RequestBody RequestUserDto user
     ){
-        if(userService.existsByUsername(user.getUsername())){
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
 
         UserEntity savedUserEntity = userService.saveUser(user);
         httpSession.setAttribute("userId", savedUserEntity.getId());
@@ -53,10 +50,6 @@ public class UserController {
     @DeleteMapping(path = "/users")
     public ResponseEntity<Void> deleteUser(HttpSession httpSession){
         Long userId = (Long) httpSession.getAttribute("userId");
-
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         userService.deleteUser(userId);
 
@@ -72,10 +65,6 @@ public class UserController {
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
 
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         ListEntity savedListEntity = listService.createList(list, userId);
         return new ResponseEntity<>(simpleListMapper.mapToSimpleListDto(savedListEntity), HttpStatus.CREATED);
     }
@@ -86,10 +75,6 @@ public class UserController {
             @PathVariable("list_id") UUID list_id
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
-
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         ListEntity removedListEntity = userService.removeList(userId, list_id);
 

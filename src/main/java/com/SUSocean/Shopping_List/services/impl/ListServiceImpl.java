@@ -13,6 +13,8 @@ import com.SUSocean.Shopping_List.mappers.impl.SimpleListMapper;
 import com.SUSocean.Shopping_List.repositories.ListRepository;
 import com.SUSocean.Shopping_List.repositories.UserRepository;
 import com.SUSocean.Shopping_List.services.ListService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,10 @@ public class ListServiceImpl implements ListService {
     @Transactional
     public ListEntity createList(SimpleListDto simpleListDto, Long user_id) {
 
+        if(user_id == null){
+            throw new BadRequestException("Bad user id");
+        }
+
         UserEntity userEntity = userRepository.findById(user_id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -62,6 +68,9 @@ public class ListServiceImpl implements ListService {
     @Override
     @Transactional(readOnly = true)
     public ListEntity findById(UUID listId, Long userId) {
+        if(userId == null){
+            throw new ForbiddenException("Not logged in");
+        }
         ListEntity listEntity = listRepository.findById(listId)
                 .orElseThrow(() -> new NotFoundException("List not found"));
         UserEntity userEntity = userRepository.findById(userId)
@@ -77,6 +86,9 @@ public class ListServiceImpl implements ListService {
     @Override
     @Transactional
     public ListEntity addUser(UUID listId, Long creatorId, SimpleUserDto user) {
+        if(creatorId == null){
+            throw new ForbiddenException("Not logged in");
+        }
         ListEntity listEntity = listRepository.findById(listId)
                 .orElseThrow(() -> new NotFoundException("List not found"));
         UserEntity userEntity = userRepository.findByUsername(user.getUsername())
@@ -98,6 +110,9 @@ public class ListServiceImpl implements ListService {
 
     @Override
     public ListEntity removeUser(UUID listId, Long creatorId, SimpleUserDto user) {
+        if(creatorId == null){
+            throw new ForbiddenException("Not logged in");
+        }
         ListEntity listEntity = listRepository.findById(listId)
                 .orElseThrow(() -> new NotFoundException("List not found"));
         UserEntity userEntity = userRepository.findById(user.getId())
@@ -113,7 +128,7 @@ public class ListServiceImpl implements ListService {
 
         if(Objects.equals(listEntity.getCreator(), userEntity)){
             listEntity.setCreator(listEntity.getUsers().stream().findFirst()
-                    .orElseThrow(() -> new BadRequestException("can't remove self")));
+                    .orElseThrow(() -> new BadRequestException("Can't remove self")));
         }
 
         listEntity.getUsers().remove(userEntity);
@@ -125,6 +140,9 @@ public class ListServiceImpl implements ListService {
     @Override
     @Transactional
     public List<ItemDto> reorderList(Long userId, UUID listId, RequestReorderListDto list) {
+        if(userId == null){
+            throw new ForbiddenException("Not logged in");
+        }
         ListEntity listEntity = listRepository.findById(listId)
                 .orElseThrow(() -> new NotFoundException("List not found"));
         UserEntity userEntity = userRepository.findById(userId)
@@ -152,6 +170,9 @@ public class ListServiceImpl implements ListService {
 
     @Override
     public SimpleListDto renameList(Long userId, UUID listId, String name) {
+        if(userId == null){
+            throw new ForbiddenException("Not logged in");
+        }
         ListEntity listEntity = listRepository.findById(listId)
                 .orElseThrow(() -> new NotFoundException("List not found"));
         UserEntity userEntity = userRepository.findById(userId)

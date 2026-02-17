@@ -42,10 +42,6 @@ public class ListController {
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
 
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         ListEntity listEntity = listService.findById(list_id, userId);
 
         return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
@@ -58,10 +54,6 @@ public class ListController {
             @RequestBody SimpleUserDto user
     ){
         Long creatorId = (Long) httpSession.getAttribute("userId");
-
-        if(creatorId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         ListEntity listEntity = listService.addUser(list_id, creatorId, user);
 
@@ -76,10 +68,6 @@ public class ListController {
     ){
         Long creatorId = (Long) httpSession.getAttribute("userId");
 
-        if(creatorId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         ListEntity listEntity = listService.removeUser(list_id, creatorId, user);
 
         return new ResponseEntity<>(openedListMapper.mapToOpenedListDto(listEntity), HttpStatus.OK);
@@ -93,10 +81,6 @@ public class ListController {
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
 
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         ItemEntity itemEntity = itemService.createItem(userId, list_id, requestItemDto);
 
         return new ResponseEntity<>(itemMapper.mapToItemDto(itemEntity), HttpStatus.OK);
@@ -109,10 +93,6 @@ public class ListController {
             @PathVariable("item_id") UUID item_id
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
-
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         ItemEntity itemEntity = itemService.removeItem(userId, list_id, item_id);
 
@@ -128,10 +108,6 @@ public class ListController {
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
 
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         ItemEntity itemEntity = itemService.editItem(userId, list_id, item_id, item);
 
         return new ResponseEntity<>(itemMapper.mapToItemDto(itemEntity), HttpStatus.OK);
@@ -145,10 +121,6 @@ public class ListController {
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
 
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         List<ItemDto> itemList = listService.reorderList(userId, list_id, list);
 
         return new ResponseEntity<>(itemList, HttpStatus.OK);
@@ -161,10 +133,6 @@ public class ListController {
             @RequestBody RequestRenameListDto requestRenameListDto
     ){
         Long userId = (Long) httpSession.getAttribute("userId");
-
-        if(userId == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         SimpleListDto list = listService.renameList(userId, list_id, requestRenameListDto.getName());
 

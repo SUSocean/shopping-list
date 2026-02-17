@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+//import com.fasterxml.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.*;
@@ -83,6 +85,49 @@ public class ListControllerIntegrationTests {
                 MockMvcResultMatchers.jsonPath("$.creator").value(simpleUserDto)
         ).andExpect(
                 MockMvcResultMatchers.jsonPath("$.users[0]").value(simpleUserDto)
+        );
+    }
+
+    @Test
+    public void testThatGetListReturnsForbiddenWhenUserNotLoggedIn() throws Exception{
+        SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
+        RequestUserDto requestUserDto = TestDataUtil.createRequestUserDtoA();
+
+        UserEntity savedUserEntity = userService.saveUser(requestUserDto);
+        ListEntity savedListEntity =  listService.createList(simpleListDto, savedUserEntity.getId());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/lists/" + savedListEntity.getId())
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.message").value("Not logged in")
+        );
+    }
+
+    @Test
+    public void testThatGetListReturnForbiddenWhenUserIsNotAListMember() throws Exception{
+        SimpleListDto simpleListDto = TestDataUtil.createSimpleListDtoA();
+
+        RequestUserDto requestUserDtoA = TestDataUtil.createRequestUserDtoA();
+        RequestUserDto requestUserDtoB = TestDataUtil.createRequestUserDtoB();
+
+        UserEntity savedUserEntityA = userService.saveUser(requestUserDtoA);
+        UserEntity savedUserEntityB = userService.saveUser(requestUserDtoB);
+
+        ListEntity savedListEntity =  listService.createList(simpleListDto, savedUserEntityA.getId());
+
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", savedUserEntityB.getId());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/lists/" + savedListEntity.getId())
+                        .sessionAttrs(sessionAttrs)
+        ).andExpect(
+                MockMvcResultMatchers.status().isForbidden()
+
+        ).andExpect(
+                MockMvcResultMatchers.jsonPath("$.message").value("Not a member of a list")
         );
     }
 
