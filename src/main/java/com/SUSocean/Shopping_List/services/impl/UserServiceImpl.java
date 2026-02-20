@@ -3,10 +3,7 @@ package com.SUSocean.Shopping_List.services.impl;
 import com.SUSocean.Shopping_List.domain.dto.RequestUserDto;
 import com.SUSocean.Shopping_List.domain.entities.ListEntity;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
-import com.SUSocean.Shopping_List.exception.BadRequestException;
-import com.SUSocean.Shopping_List.exception.ConflictException;
-import com.SUSocean.Shopping_List.exception.InvalidCredentialsException;
-import com.SUSocean.Shopping_List.exception.NotFoundException;
+import com.SUSocean.Shopping_List.exception.*;
 import com.SUSocean.Shopping_List.repositories.ListRepository;
 import com.SUSocean.Shopping_List.repositories.UserRepository;
 import com.SUSocean.Shopping_List.services.UserService;
@@ -132,5 +129,17 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
 
         return listEntity;
+    }
+
+    @Override
+    public UserEntity getUser(Long userId) {
+        if(userId == null){
+            throw new ForbiddenException("Not logged in");
+        }
+
+        UserEntity userEntity =  userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user not found"));
+
+        return userEntity;
     }
 }

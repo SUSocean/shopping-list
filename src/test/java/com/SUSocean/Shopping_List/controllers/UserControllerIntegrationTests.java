@@ -80,6 +80,29 @@ public class UserControllerIntegrationTests {
     }
 
     @Test
+    public void testThatMeReturnsUnauthorizedWhenHttpSessionIsNotSet() throws Exception{
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/users/me")
+        ).andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    public void testThatMeReturnsUserDtoWhenHttpSessionIsSet() throws Exception{
+        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
+        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
+
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", savedUserEntity.getId());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/users/me")
+                        .sessionAttrs(sessionAttrs)
+        ).andExpect(MockMvcResultMatchers.status().isOk()
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.username").value(savedUserEntity.getUsername())
+        ).andExpect(MockMvcResultMatchers.jsonPath("$.id").value(savedUserEntity.getId()));
+    }
+
+    @Test
     public void testThatDeleteUserReturnsNoContentAndDeletesHttpSessionAttribute() throws Exception{
         RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
         UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);

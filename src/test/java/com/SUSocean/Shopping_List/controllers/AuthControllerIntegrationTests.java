@@ -68,22 +68,6 @@ public class AuthControllerIntegrationTests {
                 .value("Blank username or password"));
     }
 
-    @Test
-    public void testThatAuthLoginReturnsCorrectUserDtoWhenCredentialsAreCorrect() throws Exception {
-        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
-        UserEntity savedUser = userService.saveUser(testRequestUserDto);
-
-        String testRequestUserDtoJson = objectMapper.writeValueAsString(testRequestUserDto);
-
-        mockMvc.perform(
-                MockMvcRequestBuilders.post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(testRequestUserDtoJson)
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.id").isNumber()
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.username").value(savedUser.getUsername())
-        ).andExpect(MockMvcResultMatchers.jsonPath("$.lists").isEmpty()
-        );
-    }
 
     @Test
     public void testThatAuthCheckReturn401WhenHttpsSessionIsNotSet() throws Exception{

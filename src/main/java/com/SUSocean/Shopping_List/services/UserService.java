@@ -18,4 +18,6 @@ public interface UserService {
     void deleteUser(Long userId);
 
     ListEntity removeList(Long userId, UUID listId);
+
+    UserEntity getUser(Long userId);
 }

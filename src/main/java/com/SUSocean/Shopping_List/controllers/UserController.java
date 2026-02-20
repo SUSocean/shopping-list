@@ -47,6 +47,17 @@ public class UserController {
         return new ResponseEntity<>(userDtoMapper.mapToUserDto(savedUserEntity), HttpStatus.CREATED);
     }
 
+    @GetMapping(path = "users/me")
+    public ResponseEntity<UserDto> getUser(
+            HttpSession httpSession
+    ){
+        Long userId = (Long) httpSession.getAttribute("userId");
+
+        UserEntity user = userService.getUser(userId);
+
+        return new ResponseEntity<>(userDtoMapper.mapToUserDto(user), HttpStatus.OK);
+    }
+
     @DeleteMapping(path = "/users")
     public ResponseEntity<Void> deleteUser(HttpSession httpSession){
         Long userId = (Long) httpSession.getAttribute("userId");

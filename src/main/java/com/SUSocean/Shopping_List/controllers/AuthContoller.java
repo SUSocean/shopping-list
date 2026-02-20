@@ -37,7 +37,7 @@ public class AuthContoller {
 
         httpSession.setAttribute("userId", foundUserEntity.getId());
 
-        return new ResponseEntity<>(userDtoMapper.mapToUserDto(foundUserEntity),HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(path = "/auth/logout")
