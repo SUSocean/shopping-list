@@ -8,6 +8,7 @@ import com.SUSocean.Shopping_List.services.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,5 +46,15 @@ public class AuthContoller {
 
         return ResponseEntity.ok().build();
 
+    }
+
+    @GetMapping("/auth/check")
+    public ResponseEntity<Boolean> checkSession(HttpSession httpSession) {
+        Long userId = (Long) httpSession.getAttribute("userId");
+        if (userId != null) {
+            return ResponseEntity.ok(true);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
     }
 }
