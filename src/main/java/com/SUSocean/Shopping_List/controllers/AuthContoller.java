@@ -5,6 +5,7 @@ import com.SUSocean.Shopping_List.domain.dto.UserDto;
 import com.SUSocean.Shopping_List.domain.entities.UserEntity;
 import com.SUSocean.Shopping_List.mappers.impl.UserDtoMapper;
 import com.SUSocean.Shopping_List.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,12 +50,20 @@ public class AuthContoller {
     }
 
     @GetMapping("/auth/check")
-    public ResponseEntity<Boolean> checkSession(HttpSession httpSession) {
-        Long userId = (Long) httpSession.getAttribute("userId");
-        if (userId != null) {
-            return ResponseEntity.ok(true);
-        } else {
+    public ResponseEntity<Boolean> checkSession(HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
         }
+
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
+
+        return ResponseEntity.ok(true);
     }
 }

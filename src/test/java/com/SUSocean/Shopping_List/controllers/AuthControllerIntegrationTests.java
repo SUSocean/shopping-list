@@ -86,6 +86,28 @@ public class AuthControllerIntegrationTests {
     }
 
     @Test
+    public void testThatAuthCheckReturn401WhenHttpsSessionIsNotSet() throws Exception{
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/auth/check")
+        ).andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    public void testThatAuthCheckReturn200WhenHttpsSessionIsSet() throws Exception{
+        RequestUserDto testRequestUserDto = TestDataUtil.createRequestUserDtoA();
+        UserEntity savedUserEntity = userService.saveUser(testRequestUserDto);
+
+        Map<String, Object> sessionAttrs = new HashMap<>();
+        sessionAttrs.put("userId", savedUserEntity.getId());
+
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/auth/check")
+                        .sessionAttrs(sessionAttrs)
+        ).andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
     public void testThatAuthLoginReturns401UnauthorizedWhenCredentialAreIncorrect() throws Exception {
         RequestUserDto testRequestUserDtoA = TestDataUtil.createRequestUserDtoA();
         RequestUserDto testRequestUserDtoB = TestDataUtil.createRequestUserDtoB();
